@@ -221,14 +221,8 @@ namespace Pilot
         post_process_per_frame_input_attachment_info.imageView   = input_attachment;
         post_process_per_frame_input_attachment_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        VkDescriptorImageInfo color_grading_LUT_image_info = {};
-        color_grading_LUT_image_info.sampler =
-            PVulkanUtil::getOrCreateLinearSampler(m_p_vulkan_context->_physical_device, m_p_vulkan_context->_device);
-        color_grading_LUT_image_info.imageView =
-            m_p_global_render_resource->_color_grading_resource._color_grading_LUT_texture_image_view;
-        color_grading_LUT_image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        VkWriteDescriptorSet post_process_descriptor_writes_info[2];
+        VkWriteDescriptorSet post_process_descriptor_writes_info[1];
 
         VkWriteDescriptorSet& post_process_descriptor_input_attachment_write_info =
             post_process_descriptor_writes_info[0];
@@ -241,15 +235,6 @@ namespace Pilot
         post_process_descriptor_input_attachment_write_info.descriptorCount = 1;
         post_process_descriptor_input_attachment_write_info.pImageInfo = &post_process_per_frame_input_attachment_info;
 
-        VkWriteDescriptorSet& post_process_descriptor_LUT_write_info = post_process_descriptor_writes_info[1];
-        post_process_descriptor_LUT_write_info.sType                 = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        post_process_descriptor_LUT_write_info.pNext                 = NULL;
-        post_process_descriptor_LUT_write_info.dstSet                = _descriptor_infos[0].descriptor_set;
-        post_process_descriptor_LUT_write_info.dstBinding            = 1;
-        post_process_descriptor_LUT_write_info.dstArrayElement       = 0;
-        post_process_descriptor_LUT_write_info.descriptorType        = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        post_process_descriptor_LUT_write_info.descriptorCount       = 1;
-        post_process_descriptor_LUT_write_info.pImageInfo            = &color_grading_LUT_image_info;
 
         vkUpdateDescriptorSets(m_p_vulkan_context->_device,
                                sizeof(post_process_descriptor_writes_info) /
