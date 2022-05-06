@@ -45,5 +45,5 @@ void main()
     highp vec4 lut_color = mix(lut_floor_color, lut_ceil_color, red_color);
 
     // 颜色输出
-    out_color = lut_color;
+    out_color = color;
 }

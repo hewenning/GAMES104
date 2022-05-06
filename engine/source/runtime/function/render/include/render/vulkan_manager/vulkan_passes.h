@@ -27,6 +27,21 @@ namespace Pilot
         void setupDescriptorSet();
     };
 
+    // Add special effect pass
+    class PSpecialEffectPass : public PRenderPassBase
+    {
+    public:
+        void initialize(VkRenderPass render_pass, VkImageView input_attachment);
+        void draw();
+
+        void updateAfterFramebufferRecreate(VkImageView input_attachment);
+
+    private:
+        void setupDescriptorSetLayout();
+        void setupPipelines();
+        void setupDescriptorSet();
+    };
+
     class PToneMappingPass : public PRenderPassBase
     {
     public:
@@ -85,6 +100,7 @@ namespace Pilot
         _main_camera_pass_attachment_count        = 7,
     };
 
+    // Add special effect pass
     enum
     {
         _main_camera_subpass_basepass = 0,
@@ -92,6 +108,7 @@ namespace Pilot
         _main_camera_subpass_forward_lighting,
         _main_camera_subpass_tone_mapping,
         _main_camera_subpass_color_grading,
+        _main_camera_subpass_special_effect,
         _main_camera_subpass_ui,
         _main_camera_subpass_combine_ui,
         _main_camera_subpass_count
@@ -136,20 +153,23 @@ namespace Pilot
 
         void initialize();
 
-        void draw(PColorGradingPass& color_grading_pass,
-                  PToneMappingPass&  tone_mapping_pass,
-                  PUIPass&           ui_pass,
-                  PCombineUIPass&    combine_ui_pass,
-                  uint32_t           current_swapchain_image_index,
-                  void*              ui_state);
+        // Add special effect pass
+        void draw(PColorGradingPass&  color_grading_pass,
+                  PToneMappingPass&   tone_mapping_pass,
+                  PSpecialEffectPass& special_effect_pass,
+                  PUIPass&            ui_pass,
+                  PCombineUIPass&     combine_ui_pass,
+                  uint32_t            current_swapchain_image_index,
+                  void*               ui_state);
 
         // legacy
-        void drawForward(PColorGradingPass& color_grading_pass,
-                         PToneMappingPass&  tone_mapping_pass,
-                         PUIPass&           ui_pass,
-                         PCombineUIPass&    combine_ui_pass,
-                         uint32_t           current_swapchain_image_index,
-                         void*              ui_state);
+        void drawForward(PColorGradingPass&  color_grading_pass,
+                         PToneMappingPass&   tone_mapping_pass,
+                         PSpecialEffectPass& special_effect_pass,
+                         PUIPass&            ui_pass,
+                         PCombineUIPass&     combine_ui_pass,
+                         uint32_t            current_swapchain_image_index,
+                         void*               ui_state);
 
         void setHelperInfo(const PLightPassHelperInfo& helper_info);
 

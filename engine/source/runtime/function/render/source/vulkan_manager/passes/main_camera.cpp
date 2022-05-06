@@ -273,6 +273,27 @@ namespace Pilot
         color_grading_pass.preserveAttachmentCount = 0;
         color_grading_pass.pPreserveAttachments    = NULL;
 
+        // Add special effect pass
+        VkAttachmentReference special_effect_pass_input_attachment_reference {};
+        special_effect_pass_input_attachment_reference.attachment =
+            &backup_even_color_attachment_description - attachments;
+        special_effect_pass_input_attachment_reference.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        VkAttachmentReference special_effect_pass_color_attachment_reference {};
+        special_effect_pass_color_attachment_reference.attachment =
+            &backup_odd_color_attachment_description - attachments;
+        special_effect_pass_color_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkSubpassDescription& special_effect_pass   = subpasses[_main_camera_subpass_special_effect];
+        special_effect_pass.pipelineBindPoint       = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        special_effect_pass.inputAttachmentCount    = 1;
+        special_effect_pass.pInputAttachments       = &special_effect_pass_input_attachment_reference;
+        special_effect_pass.colorAttachmentCount    = 1;
+        special_effect_pass.pColorAttachments       = &special_effect_pass_color_attachment_reference;
+        special_effect_pass.pDepthStencilAttachment = NULL;
+        special_effect_pass.preserveAttachmentCount = 0;
+        special_effect_pass.pPreserveAttachments    = NULL;
+
         VkAttachmentReference ui_pass_color_attachment_reference {};
         ui_pass_color_attachment_reference.attachment = &backup_even_color_attachment_description - attachments;
         ui_pass_color_attachment_reference.layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -312,7 +333,8 @@ namespace Pilot
         combine_ui_pass.preserveAttachmentCount = 0;
         combine_ui_pass.pPreserveAttachments    = NULL;
 
-        VkSubpassDependency dependencies[7] = {};
+        // Add special effect pass
+        VkSubpassDependency dependencies[_main_camera_subpass_count] = {};
 
         VkSubpassDependency& deferred_lighting_pass_depend_on_shadow_map_pass = dependencies[0];
         deferred_lighting_pass_depend_on_shadow_map_pass.srcSubpass           = VK_SUBPASS_EXTERNAL;
@@ -388,7 +410,17 @@ namespace Pilot
             VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
         ui_pass_depend_on_color_grading_pass.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-        VkSubpassDependency& combine_ui_pass_depend_on_ui_pass = dependencies[6];
+        // Add special effect pass
+        VkSubpassDependency& special_effect_pass_depend_on_tone_mapping_pass = dependencies[6];
+        special_effect_pass_depend_on_tone_mapping_pass.srcSubpass = _main_camera_subpass_special_effect;
+        special_effect_pass_depend_on_tone_mapping_pass.dstSubpass = _main_camera_subpass_ui;
+        special_effect_pass_depend_on_tone_mapping_pass.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        special_effect_pass_depend_on_tone_mapping_pass.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        special_effect_pass_depend_on_tone_mapping_pass.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        special_effect_pass_depend_on_tone_mapping_pass.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        special_effect_pass_depend_on_tone_mapping_pass.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+        VkSubpassDependency& combine_ui_pass_depend_on_ui_pass = dependencies[7];
         combine_ui_pass_depend_on_ui_pass.srcSubpass           = _main_camera_subpass_ui;
         combine_ui_pass_depend_on_ui_pass.dstSubpass           = _main_camera_subpass_combine_ui;
         combine_ui_pass_depend_on_ui_pass.srcStageMask =
@@ -2085,12 +2117,14 @@ namespace Pilot
         setupSwapchainFramebuffers();
     }
 
-    void PMainCameraPass::draw(PColorGradingPass& color_grading_pass,
-                               PToneMappingPass&  tone_mapping_pass,
-                               PUIPass&           ui_pass,
-                               PCombineUIPass&    combine_ui_pass,
-                               uint32_t           current_swapchain_image_index,
-                               void*              ui_state)
+    // Add special effect pass
+    void PMainCameraPass::draw(PColorGradingPass&  color_grading_pass,
+                               PToneMappingPass&   tone_mapping_pass,
+                               PSpecialEffectPass& special_effect_pass,
+                               PUIPass&            ui_pass,
+                               PCombineUIPass&     combine_ui_pass,
+                               uint32_t            current_swapchain_image_index,
+                               void*               ui_state)
     {
         {
             VkRenderPassBeginInfo renderpass_begin_info {};
@@ -2171,6 +2205,11 @@ namespace Pilot
 
         m_p_vulkan_context->_vkCmdNextSubpass(m_command_info._current_command_buffer, VK_SUBPASS_CONTENTS_INLINE);
 
+        // Add special effect pass
+        special_effect_pass.draw();
+
+        m_p_vulkan_context->_vkCmdNextSubpass(m_command_info._current_command_buffer, VK_SUBPASS_CONTENTS_INLINE);
+
         VkClearAttachment clear_attachments[1];
         clear_attachments[0].aspectMask                  = VK_IMAGE_ASPECT_COLOR_BIT;
         clear_attachments[0].colorAttachment             = 0;
@@ -2202,12 +2241,14 @@ namespace Pilot
         m_p_vulkan_context->_vkCmdEndRenderPass(m_command_info._current_command_buffer);
     }
 
-    void PMainCameraPass::drawForward(PColorGradingPass& color_grading_pass,
-                                      PToneMappingPass&  tone_mapping_pass,
-                                      PUIPass&           ui_pass,
-                                      PCombineUIPass&    combine_ui_pass,
-                                      uint32_t           current_swapchain_image_index,
-                                      void*              ui_state)
+    // Add special effect pass
+    void PMainCameraPass::drawForward(PColorGradingPass&  color_grading_pass,
+                                      PToneMappingPass&   tone_mapping_pass,
+                                      PSpecialEffectPass& special_effect_pass,
+                                      PUIPass&            ui_pass,
+                                      PCombineUIPass&     combine_ui_pass,
+                                      uint32_t            current_swapchain_image_index,
+                                      void*               ui_state)
     {
         {
             VkRenderPassBeginInfo renderpass_begin_info {};
@@ -2259,6 +2300,11 @@ namespace Pilot
         m_p_vulkan_context->_vkCmdNextSubpass(m_command_info._current_command_buffer, VK_SUBPASS_CONTENTS_INLINE);
 
         color_grading_pass.draw();
+
+        m_p_vulkan_context->_vkCmdNextSubpass(m_command_info._current_command_buffer, VK_SUBPASS_CONTENTS_INLINE);
+
+        // Add special effect pass
+        special_effect_pass.draw();
 
         m_p_vulkan_context->_vkCmdNextSubpass(m_command_info._current_command_buffer, VK_SUBPASS_CONTENTS_INLINE);
 

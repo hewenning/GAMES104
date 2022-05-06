@@ -119,6 +119,8 @@ namespace Pilot
         PMainCameraPass             m_main_camera_pass;
         PColorGradingPass           m_color_grading_pass;
         PToneMappingPass            m_tone_mapping_pass;
+        // Add special effect pass
+        PSpecialEffectPass          m_special_effect_pass;
         PUIPass                     m_ui_pass;
         PCombineUIPass              m_combine_ui_pass;
         PPickPass                   m_mouse_pick_pass;

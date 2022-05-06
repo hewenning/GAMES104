@@ -29,6 +29,9 @@ bool Pilot::PVulkanManager::initializeRenderPass()
     m_point_light_shadow_pass.postInitialize();
     m_directional_light_shadow_pass.postInitialize();
 
+    // Add special effect pass
+    m_special_effect_pass.initialize(m_main_camera_pass.getRenderPass(), m_main_camera_pass.getFramebufferImageViews()[_main_camera_pass_backup_buffer_odd]);
+
     m_tone_mapping_pass.initialize(m_main_camera_pass.getRenderPass(), m_main_camera_pass.getFramebufferImageViews()[_main_camera_pass_backup_buffer_odd]);
 
     m_color_grading_pass.initialize(m_main_camera_pass.getRenderPass(), m_main_camera_pass.getFramebufferImageViews()[_main_camera_pass_backup_buffer_even]);
