@@ -18,5 +18,5 @@ void main()
     highp vec4 color = subpassLoad(in_color).rgba;
 
     // 颜色输出
-    out_color = vec4(color.r, 0, 0, 1);
+    out_color = vec4(color.r, color.g, 0, color.a);
 }
