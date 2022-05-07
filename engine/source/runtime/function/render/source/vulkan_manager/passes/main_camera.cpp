@@ -399,7 +399,7 @@ namespace Pilot
 
         VkSubpassDependency& ui_pass_depend_on_color_grading_pass = dependencies[5];
         ui_pass_depend_on_color_grading_pass.srcSubpass           = _main_camera_subpass_color_grading;
-        ui_pass_depend_on_color_grading_pass.dstSubpass           = _main_camera_subpass_ui;
+        ui_pass_depend_on_color_grading_pass.dstSubpass           = _main_camera_subpass_special_effect;
         ui_pass_depend_on_color_grading_pass.srcStageMask =
             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         ui_pass_depend_on_color_grading_pass.dstStageMask =
@@ -414,10 +414,14 @@ namespace Pilot
         VkSubpassDependency& special_effect_pass_depend_on_tone_mapping_pass = dependencies[6];
         special_effect_pass_depend_on_tone_mapping_pass.srcSubpass = _main_camera_subpass_special_effect;
         special_effect_pass_depend_on_tone_mapping_pass.dstSubpass = _main_camera_subpass_ui;
-        special_effect_pass_depend_on_tone_mapping_pass.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        special_effect_pass_depend_on_tone_mapping_pass.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        special_effect_pass_depend_on_tone_mapping_pass.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        special_effect_pass_depend_on_tone_mapping_pass.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        special_effect_pass_depend_on_tone_mapping_pass.srcStageMask =
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        special_effect_pass_depend_on_tone_mapping_pass.dstStageMask =
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        special_effect_pass_depend_on_tone_mapping_pass.srcAccessMask =
+            VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        special_effect_pass_depend_on_tone_mapping_pass.dstAccessMask =
+            VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
         special_effect_pass_depend_on_tone_mapping_pass.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
         VkSubpassDependency& combine_ui_pass_depend_on_ui_pass = dependencies[7];
