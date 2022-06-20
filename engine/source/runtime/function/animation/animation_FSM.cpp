@@ -29,7 +29,6 @@ namespace Pilot
         float  speed          = tryGetFloat(signals, "speed", 0);
         bool   is_moving      = speed > 0.01f;
         bool   start_walk_end = false;
-
         switch (m_state)
         {
             case States::_idle:
@@ -112,4 +111,3 @@ namespace Pilot
         }
     }
 }
-

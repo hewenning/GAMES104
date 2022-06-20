@@ -38,7 +38,7 @@ void AnimationPose::extractFromClip(std::vector<Transform>& bones, const Animati
     bones.resize(clip.node_count);
 
     float exact_frame        = ratio * (clip.total_frame - 1);
-    int   current_frame_low  = floor(exact_frame); 
+    int   current_frame_low  = floor(exact_frame);
     int   current_frame_high = ceil(exact_frame);
     float lerp_ratio         = exact_frame - current_frame_low;
     for (int i = 0; i < clip.node_count; i++)
@@ -63,18 +63,14 @@ void AnimationPose::blend(const AnimationPose& pose)
 
         float weight     = pose.m_weight.m_blend_weight[i];
         float sum_weight = weight + m_weight.m_blend_weight[i];
-        if (sum_weight != 0)
+        if (sum_weight == 0)
         {
-            float cur_weight           = weight / sum_weight;
-            m_weight.m_blend_weight[i] = sum_weight;
-
-            bone_trans_one.m_position = Vector3::lerp(bone_trans_one.m_position, bone_trans_two.m_position, cur_weight);
-            bone_trans_one.m_scale    = Vector3::lerp(bone_trans_one.m_scale, bone_trans_two.m_scale, cur_weight);
-            bone_trans_one.m_rotation =
-                Quaternion::nLerp(cur_weight, bone_trans_one.m_rotation, bone_trans_two.m_rotation, true);
+            continue;
         }
+        float cur_weight           = weight / sum_weight;
+        m_weight.m_blend_weight[i] = sum_weight;
+        bone_trans_one.m_position = Vector3::lerp(bone_trans_one.m_position, bone_trans_two.m_position, cur_weight);
+        bone_trans_one.m_rotation = Quaternion::nLerp(cur_weight, bone_trans_one.m_rotation, bone_trans_two.m_rotation, true);
+        bone_trans_one.m_scale    = Vector3::lerp(bone_trans_one.m_scale, bone_trans_two.m_scale, cur_weight);
     }
 }
-
-
-
