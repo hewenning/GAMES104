@@ -90,9 +90,7 @@ namespace Pilot
                 total_normal += hits[i].hit_normal.normalisedCopy();
             }
             total_normal.z = 0.0f;
-            total_normal.normalise();
-            horizontal_direction -= total_normal;
-
+            horizontal_direction -= total_normal.normalisedCopy();
             final_position += horizontal_direction * horizontal_displacement.length();
         }
         else
