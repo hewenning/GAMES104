@@ -21,6 +21,7 @@ namespace Piccolo
     {
         registerEdtorTickComponent("TransformComponent");
         registerEdtorTickComponent("MeshComponent");
+        registerEdtorTickComponent("PropertyComponent");
     }
 
     PiccoloEditor::~PiccoloEditor() {}
